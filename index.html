@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hacksu | Student Hackathon Club</title>
+<meta name="description" content="Hacksu is a student club that helps you enter hackathons and build AI, programming, and marketing skills. Find the next meeting, add it to your calendar, and join the community.">
+<meta name="theme-color" content="#000000">
+<meta name="color-scheme" content="dark">
+<!-- Canonical placeholder: replace with your GitHub Pages URL, e.g. <link rel="canonical" href="https://YOURNAME.github.io/REPO/"> -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Hacksu | Student Hackathon Club">
+<meta property="og:description" content="Enter hackathons, build AI, programming, and marketing skills, and meet your team. Meetings, maps, and calendar links inside.">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Hacksu | Student Hackathon Club">
+<meta name="twitter:description" content="Enter hackathons, build AI, programming, and marketing skills, and meet your team.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2300ff41'/%3E%3Cstop offset='1' stop-color='%2300ff41'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='%23000000'/%3E%3Cpath d='M22 20l-12 12 12 12M42 20l12 12-12 12M35 16l-6 32' fill='none' stroke='url(%23g)' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+<style>
+/* ==========================================================================
+   DESIGN TOKENS  (CUSTOMIZE: change colors, fonts, radii here to re-theme)
+   ========================================================================== */
+:root {
+  color-scheme: dark;
+
+  /* colors: Matrix terminal theme */
+  --bg: #000000;
+  --bg-elev: #020a04;
+  --surface: rgba(0, 12, 4, 0.88);
+  --surface-2: #03140a;
+  --border: rgba(0, 255, 65, 0.28);
+  --border-strong: rgba(0, 255, 65, 0.6);
+  --text: #d2ffdc;
+  --muted: #7fcf95;
+  --accent: #00ff41;      /* matrix green */
+  --accent-2: #8dffa8;    /* pale phosphor */
+  --on-accent: #001a07;
+  --gradient: linear-gradient(120deg, var(--accent), var(--accent));
+  --focus: #ffffff;
+  --rain: #00ff41;        /* falling digits colour (read by the canvas script) */
+
+  /* fonts (CUSTOMIZE: swap family names; also update the Google Fonts <link>) */
+  --font-display: "Share Tech Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-body: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: "Share Tech Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+
+  /* radii (sharp terminal corners) */
+  --radius: 2px;
+  --radius-sm: 2px;
+  --radius-pill: 2px;
+
+  /* shadows */
+  --shadow: 0 0 0 1px rgba(0, 255, 65, 0.08), 0 10px 30px -12px rgba(0, 0, 0, 0.9);
+  --shadow-glow: 0 0 22px -4px rgba(0, 255, 65, 0.55);
+
+  /* spacing scale */
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px; --s7: 48px; --s8: 72px; --s9: 112px;
+
+  /* layout and motion */
+  --max: 1120px;
+  --gutter: 16px;
+  --header-h: 64px;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --t: 180ms var(--ease);
+}
+
+/* ==========================================================================
+   BASE
+   ========================================================================== */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-padding-top: calc(var(--header-h) + 8px); }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.6;
+  overflow-x: hidden;
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+/* Matrix rain canvas + vignette so text stays readable */
+#rain { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -2; pointer-events: none; display: block; }
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 50% 35%, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.15) 70%),
+    repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.18) 0 1px, transparent 1px 3px);
+}
+h1, h2, h3, p { margin: 0; overflow-wrap: anywhere; }
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.12; letter-spacing: 0; font-weight: 400; text-shadow: 0 0 12px rgba(0, 255, 65, 0.45); }
+h2::before { content: "> "; color: var(--accent); }
+a { color: inherit; }
+svg { display: block; flex: none; }
+.container { width: 100%; max-width: var(--max); margin-inline: auto; padding-inline: var(--gutter); }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+[hidden] { display: none !important; }
+
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; border-radius: 6px; }
+
+.skip-link {
+  position: absolute; left: var(--s4); top: -100px; z-index: 100;
+  background: var(--text); color: var(--bg); padding: var(--s3) var(--s4);
+  border-radius: var(--radius-sm); font-weight: 700; text-decoration: none;
+}
+.skip-link:focus { top: var(--s3); }
+
+.mono { font-family: var(--font-mono); }
+.hero .lede, .section-head p, .sub-head h3, .eyebrow { text-shadow: 0 0 4px #000, 0 0 10px #000, 0 0 18px #000; }
+.eyebrow {
+  font-family: var(--font-mono); font-size: 0.8rem; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--accent-2);
+}
+.grad-text { color: var(--accent); text-shadow: 0 0 18px rgba(0, 255, 65, 0.7); }
+.grad-text::after { content: "_"; animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* ==========================================================================
+   BUTTONS
+   ========================================================================== */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--s2);
+  min-height: 44px; min-width: 44px; padding: 10px 18px;
+  border: 1px solid var(--border-strong); border-radius: var(--radius-pill);
+  background: rgba(0, 20, 6, 0.75); color: var(--accent);
+  font: 500 0.9rem/1.2 var(--font-display); text-transform: uppercase; letter-spacing: 0.06em;
+  text-decoration: none; cursor: pointer;
+  transition: transform var(--t), background var(--t), border-color var(--t), box-shadow var(--t), color var(--t);
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:hover { background: var(--accent); color: var(--on-accent); border-color: var(--accent); box-shadow: var(--shadow-glow); }
+.btn:active { transform: translateY(1px); }
+.btn svg { width: 18px; height: 18px; }
+.btn-primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent); box-shadow: var(--shadow-glow); }
+.btn-primary:hover { background: #000; color: var(--accent); border-color: var(--accent); }
+.btn-sm { padding: 8px 14px; font-size: 0.85rem; }
+.btn-lg { padding: 14px 24px; font-size: 1.05rem; }
+
+/* ==========================================================================
+   HEADER
+   ========================================================================== */
+.site-header {
+  position: sticky; top: 0; z-index: 50;
+  padding-top: env(safe-area-inset-top);
+  background: rgba(0, 6, 2, 0.82);
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+}
+.header-inner { display: flex; align-items: center; gap: var(--s3); min-height: var(--header-h); }
+.brand { display: inline-flex; align-items: center; gap: var(--s3); text-decoration: none; font: italic 700 1.7rem/1 Helvetica, Arial, "Helvetica Neue", sans-serif; letter-spacing: -0.04em; text-transform: lowercase; color: #fff; min-height: 44px; margin-right: auto; }
+.brand-mark { width: 36px; height: 36px; }
+.nav-toggle { width: 44px; height: 44px; padding: 0; }
+.nav-toggle .icon-close { display: none; }
+.nav-toggle[aria-expanded="true"] .icon-close { display: block; }
+.nav-toggle[aria-expanded="true"] .icon-menu { display: none; }
+.hdr-discord { display: none; }
+
+.nav {
+  position: absolute; left: 0; right: 0; top: 100%;
+  background: var(--bg-elev); border-bottom: 1px solid var(--border);
+  padding: var(--s3) var(--gutter) var(--s5);
+  box-shadow: var(--shadow);
+}
+.js .nav { display: none; }
+.js .nav.open { display: block; }
+.nav ul { list-style: none; margin: 0 auto; padding: 0; max-width: var(--max); display: grid; gap: var(--s1); }
+.nav a.nav-link { display: flex; align-items: center; min-height: 48px; padding: 0 var(--s3); border-radius: var(--radius-sm); text-decoration: none; font-weight: 500; color: var(--text); text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.9rem; transition: color var(--t), background var(--t); }
+.nav a.nav-link:hover { color: var(--accent); background: rgba(0, 255, 65, 0.1); }
+.nav .menu-discord { margin-top: var(--s3); }
+.nav .menu-discord .btn { width: 100%; }
+
+@media (min-width: 480px) {
+  :root { --gutter: 24px; }
+  .hdr-discord { display: inline-flex; }
+  .nav .menu-discord { display: none; }
+}
+@media (min-width: 768px) {
+  .nav-toggle { display: none; }
+  .js .nav, .nav { display: block; position: static; background: none; border: 0; box-shadow: none; padding: 0; }
+  .nav ul { display: flex; gap: var(--s1); max-width: none; margin: 0; }
+  .brand { margin-right: auto; }
+  .header-inner { gap: var(--s5); }
+  .site-header .header-inner { flex-wrap: nowrap; }
+  .nav { order: 2; }
+  .hdr-discord { order: 3; }
+  .brand { order: 1; }
+}
+
+/* ==========================================================================
+   LANDING (full-screen intro above everything else)
+   ========================================================================== */
+.landing { min-height: calc(100vh - var(--header-h)); min-height: calc(100dvh - var(--header-h)); display: grid; place-items: center; text-align: center; padding: var(--s7) var(--gutter) var(--s8); position: relative; }
+.landing-inner { display: grid; gap: var(--s4); justify-items: center; max-width: 760px; }
+.landing-word { font: italic 700 clamp(4rem, 19vw, 9.5rem)/1 Helvetica, Arial, "Helvetica Neue", sans-serif; letter-spacing: -0.05em; text-transform: lowercase; color: #fff; text-shadow: 0 0 30px rgba(0, 0, 0, 0.9); padding-right: 0.08em; }
+.landing-word::before { content: none; }
+.landing-pron { font: 400 clamp(0.85rem, 2.5vw, 1.05rem)/1.4 Helvetica, Arial, sans-serif; letter-spacing: 0.08em; color: #9a9a9a; text-transform: uppercase; text-shadow: 0 0 8px #000, 0 0 16px #000; }
+.landing-pron em { margin-left: 0.8em; }
+.landing-tag { font: 400 clamp(1.05rem, 3vw, 1.4rem)/1.5 Helvetica, Arial, sans-serif; color: #c4c4c4; max-width: 34ch; text-shadow: 0 0 8px #000, 0 0 16px #000; }
+.landing-cue { position: absolute; bottom: var(--s5); left: 50%; transform: translateX(-50%); display: grid; place-items: center; width: 44px; height: 44px; color: var(--muted); animation: bob 2s ease-in-out infinite; }
+.landing-cue svg { width: 22px; height: 22px; }
+@keyframes bob { 50% { transform: translate(-50%, 6px); } }
+
+/* ==========================================================================
+   HERO
+   ========================================================================== */
+.hero { padding-block: var(--s7) var(--s8); }
+.hero-inner { display: grid; gap: var(--s5); justify-items: start; }
+.hero h2 { font-size: clamp(2.2rem, 8vw, 4.6rem); max-width: 16ch; }
+.hero h2::before { content: none; }
+.hero .lede { font-size: clamp(1.05rem, 2.6vw, 1.3rem); color: var(--muted); max-width: 56ch; }
+.hero-cta { display: flex; flex-wrap: wrap; gap: var(--s3); }
+.chip {
+  display: inline-flex; align-items: center; gap: var(--s2); flex-wrap: wrap;
+  padding: 8px 16px; min-height: 44px; border-radius: var(--radius-pill);
+  background: rgba(0, 20, 6, 0.8); border: 1px solid var(--border-strong);
+  font: 400 0.85rem/1.4 var(--font-mono); color: var(--text); text-decoration: none;
+  transition: background var(--t), transform var(--t);
+}
+a.chip:hover { background: rgba(0, 255, 65, 0.16); }
+.chip .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-2); box-shadow: 0 0 0 0 rgba(0, 255, 65, 0.7); animation: pulse 2s infinite; }
+.chip strong { font-weight: 600; color: var(--accent-2); }
+@keyframes pulse { 70% { box-shadow: 0 0 0 8px rgba(0, 255, 65, 0); } 100% { box-shadow: 0 0 0 0 rgba(0, 255, 65, 0); } }
+
+/* ==========================================================================
+   SECTIONS
+   ========================================================================== */
+.section { padding-block: var(--s8); scroll-margin-top: calc(var(--header-h) + 8px); }
+.section-head { display: grid; gap: var(--s3); margin-bottom: var(--s6); }
+.section-head h2 { font-size: clamp(1.8rem, 5vw, 2.8rem); }
+.section-head p { color: var(--muted); max-width: 60ch; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow);
+  transition: transform var(--t), border-color var(--t), box-shadow var(--t);
+  min-width: 0;
+}
+.card:hover { border-color: var(--accent); box-shadow: var(--shadow-glow); }
+
+/* Meetings */
+.sub-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s3); margin: var(--s7) 0 var(--s4); }
+.sub-head:first-child { margin-top: 0; }
+.sub-head h3 { font-size: 1.4rem; }
+.sub-head .eyebrow { display: block; margin-bottom: var(--s1); }
+
+.event { display: grid; gap: var(--s4); padding: var(--s5); align-content: start; }
+.event h3, .event h4 { font-size: 1.3rem; color: var(--accent); }
+.event.featured { padding: var(--s5); border-color: var(--accent); box-shadow: var(--shadow-glow); }
+.event.featured:hover { transform: none; }
+.event.featured h3 { font-size: clamp(1.6rem, 4.5vw, 2.4rem); }
+.event .details { color: var(--muted); white-space: pre-line; }
+.meta { display: grid; gap: var(--s2); }
+.meta-row { display: flex; align-items: flex-start; gap: var(--s3); min-width: 0; }
+.meta-row svg { width: 20px; height: 20px; margin-top: 2px; color: var(--accent-2); }
+.meta-row .when { font-family: var(--font-mono); font-size: 0.95rem; }
+.meta-row .where small { display: block; color: var(--muted); }
+.actions { display: flex; flex-wrap: wrap; gap: var(--s2); }
+.action-label { font: 400 0.75rem/1 var(--font-mono); color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: var(--s2); display: block; }
+.tba-note { display: inline-flex; align-items: center; gap: var(--s2); color: var(--muted); font-family: var(--font-mono); font-size: 0.9rem; }
+
+.featured-body { display: grid; gap: var(--s5); }
+.map-wrap { display: grid; gap: var(--s3); }
+.map-frame {
+  position: relative; width: 100%; aspect-ratio: 4 / 3; overflow: hidden;
+  border-radius: var(--radius-sm); border: 1px solid var(--border);
+  background: var(--surface-2) repeating-linear-gradient(45deg, transparent 0 14px, rgba(255, 255, 255, 0.03) 14px 28px);
+}
+.map-frame .map-fallback { position: absolute; inset: 0; display: grid; place-items: center; padding: var(--s4); text-align: center; color: var(--muted); font-size: 0.9rem; }
+.map-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; border-radius: var(--radius-sm); }
+.map-links { display: flex; flex-wrap: wrap; gap: var(--s2); }
+
+details.map-details { border-top: 1px solid var(--border); padding-top: var(--s3); }
+details.map-details summary {
+  display: inline-flex; align-items: center; gap: var(--s2); min-height: 44px; padding: 0 var(--s2);
+  cursor: pointer; font-weight: 600; color: var(--accent-2); list-style: none; border-radius: var(--radius-sm);
+}
+details.map-details summary::-webkit-details-marker { display: none; }
+details.map-details summary svg { width: 18px; height: 18px; }
+details.map-details summary .chev { transition: transform var(--t); }
+details.map-details[open] summary .chev { transform: rotate(180deg); }
+details.map-details .map-wrap { margin-top: var(--s3); }
+
+.future-grid { display: grid; gap: var(--s4); grid-template-columns: 1fr; }
+.empty { padding: var(--s7) var(--s5); text-align: center; display: grid; gap: var(--s4); justify-items: center; }
+.empty h3 { font-size: 1.5rem; }
+.empty p { color: var(--muted); max-width: 46ch; }
+.empty .hero-cta { justify-content: center; }
+.notice { color: var(--muted); border: 1px dashed var(--border-strong); border-radius: var(--radius-sm); padding: var(--s4); }
+
+/* Connect */
+.connect-grid { display: grid; gap: var(--s3); grid-template-columns: 1fr; }
+.connect-btn {
+  display: flex; align-items: center; gap: var(--s4); min-height: 72px; padding: var(--s4) var(--s5);
+  text-decoration: none; font: 400 1.2rem/1.2 var(--font-display); text-transform: uppercase; letter-spacing: 0.05em; color: var(--text);
+  border-radius: var(--radius); border: 1px solid var(--border);
+  background: var(--surface);
+  transition: transform var(--t), border-color var(--t), box-shadow var(--t);
+  min-width: 0;
+}
+.connect-btn:hover { transform: none; border-color: var(--accent); box-shadow: var(--shadow-glow); }
+.connect-btn .ico { width: 44px; height: 44px; border-radius: 2px; display: grid; place-items: center; background: var(--accent); color: var(--on-accent); }
+.connect-btn .ico svg { width: 24px; height: 24px; }
+.connect-btn .label { min-width: 0; overflow-wrap: anywhere; }
+.connect-btn .ext { margin-left: auto; width: 18px; height: 18px; color: var(--muted); }
+
+.noscript-note { margin-top: var(--s4); padding: var(--s4); border-radius: var(--radius-sm); border: 1px solid var(--border-strong); background: var(--surface); color: var(--text); }
+
+/* Footer */
+.site-footer { border-top: 1px solid var(--border); padding-block: var(--s6) calc(var(--s6) + env(safe-area-inset-bottom)); color: var(--muted); }
+.footer-inner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s4); }
+.footer-inner a { display: inline-flex; align-items: center; min-height: 44px; color: var(--text); }
+.footer-links { display: flex; flex-wrap: wrap; gap: var(--s5); }
+
+/* Toast */
+.toast {
+  position: fixed; left: 50%; bottom: calc(var(--s5) + env(safe-area-inset-bottom)); z-index: 200;
+  transform: translate(-50%, 20px); opacity: 0; pointer-events: none;
+  max-width: calc(100% - 32px); padding: 12px 20px; border-radius: var(--radius-pill);
+  background: var(--accent); color: var(--on-accent); font-weight: 600; box-shadow: var(--shadow);
+  transition: opacity var(--t), transform var(--t); text-align: center;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* Scroll reveal (only hides content when JS is running) */
+.js .reveal { opacity: 0; transform: translateY(18px); transition: opacity 600ms var(--ease), transform 600ms var(--ease); }
+.js .reveal.in { opacity: 1; transform: none; }
+
+/* ==========================================================================
+   BREAKPOINTS
+   ========================================================================== */
+@media (min-width: 480px) {
+  .map-frame { aspect-ratio: 16 / 10; }
+}
+@media (min-width: 768px) {
+  .future-grid { grid-template-columns: repeat(2, 1fr); }
+  .connect-grid { grid-template-columns: repeat(2, 1fr); }
+  .event.featured { padding: var(--s6); }
+  .hero { padding-block: var(--s8) var(--s9); }
+}
+@media (min-width: 1024px) {
+  .featured-body.has-map { grid-template-columns: 1.05fr 1fr; align-items: start; }
+  .connect-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (min-width: 1280px) {
+  .future-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 479px) {
+  .map-frame { aspect-ratio: 4 / 3; }
+  .hero-cta .btn { width: 100%; }
+}
+
+/* ==========================================================================
+   REDUCED MOTION
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  .js .reveal { opacity: 1; transform: none; }
+  .btn:hover, .card:hover, .connect-btn:hover, a.chip:hover { transform: none; }
+}
+</style>
+</head>
+<body>
+<canvas id="rain" aria-hidden="true"></canvas>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<!-- ===================== HEADER ===================== -->
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="brand" href="#top" aria-label="Back to top">
+      <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+        <defs><linearGradient id="bm" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00ff41"/><stop offset="1" stop-color="#00ff41"/></linearGradient></defs>
+        <rect width="64" height="64" rx="16" fill="#000" stroke="#00ff41"/>
+        <path d="M22 20l-12 12 12 12M42 20l12 12-12 12M35 16l-6 32" fill="none" stroke="url(#bm)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span data-site="clubName">Hacksu</span>
+    </a>
+    <nav class="nav" id="site-nav" aria-label="Primary">
+      <ul>
+        <li><a class="nav-link" href="#meetings">Meetings</a></li>
+        <li><a class="nav-link" href="#connect">Connect</a></li>
+        <li class="menu-discord" data-needs="discordUrl"><a class="btn btn-primary" data-link="discordUrl" target="_blank" rel="noopener noreferrer"><span data-icon="discord"></span>Join Discord</a></li>
+      </ul>
+    </nav>
+    <a class="btn btn-primary btn-sm hdr-discord" data-link="discordUrl" data-needs="discordUrl" target="_blank" rel="noopener noreferrer"><span data-icon="discord"></span>Join Discord</a>
+    <button class="btn nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Menu">
+      <span class="icon-menu" data-icon="menu"></span><span class="icon-close" data-icon="close"></span>
+    </button>
+  </div>
+</header>
+
+<main id="main">
+  <!-- ===================== LANDING ===================== -->
+  <section class="landing" id="top" aria-labelledby="landing-title">
+    <div class="landing-inner">
+      <h1 class="landing-word" id="landing-title" data-site="clubName">Hacksu</h1>
+      <p class="landing-pron"><span data-site="pronunciation">/HAK ˈES ˈYŪ/</span> <em data-site="partOfSpeech">noun</em></p>
+      <p class="landing-tag" data-site="landingTagline">the student builder club. where ideas become real projects.</p>
+    </div>
+    <a class="landing-cue" href="#hero" aria-label="Scroll down"><span data-icon="chevron"></span></a>
+  </section>
+
+  <!-- ===================== HERO ===================== -->
+  <section class="hero" id="hero" aria-labelledby="hero-title">
+    <div class="container hero-inner">
+      <p class="eyebrow reveal">// <span data-site="clubName">Hacksu</span> &middot; student hackathon club_</p>
+      <h2 id="hero-title" class="reveal"><span class="grad-text" data-site="tagline">Build things. Ship fast. Win hackathons.</span></h2>
+      <p class="lede reveal" data-site="shortDescription"></p>
+      <div class="hero-cta reveal">
+        <a class="btn btn-primary btn-lg" data-link="discordUrl" data-needs="discordUrl" target="_blank" rel="noopener noreferrer"><span data-icon="discord"></span>Join Discord</a>
+        <a class="btn btn-lg" data-link="instagramUrl" data-needs="instagramUrl" target="_blank" rel="noopener noreferrer"><span data-icon="instagram"></span>Follow on Instagram</a>
+      </div>
+      <div class="reveal" id="next-chip-wrap" aria-live="off"></div>
+    </div>
+  </section>
+
+  <!-- ===================== MEETINGS ===================== -->
+  <section class="section" id="meetings" aria-labelledby="meetings-title">
+    <div class="container">
+      <div class="section-head reveal">
+        <p class="eyebrow">01 / meetings</p>
+        <h2 id="meetings-title">Come hang out</h2>
+        <p>All times shown in <span id="tz-label">Eastern Time</span>. Add any meeting to your calendar in one tap.</p>
+      </div>
+      <div id="meetings-root" aria-live="off"></div>
+      <noscript><p class="noscript-note">JavaScript is needed to display upcoming meetings. Please enable it, or check our Discord and Instagram for the latest schedule.</p></noscript>
+    </div>
+  </section>
+
+  <!-- ===================== CONNECT ===================== -->
+  <section class="section" id="connect" aria-labelledby="connect-title">
+    <div class="container">
+      <div class="section-head reveal">
+        <p class="eyebrow">02 / connect</p>
+        <h2 id="connect-title">Find us online</h2>
+        <p>Discord is where the action is: announcements, team-ups, and late-night debugging.</p>
+      </div>
+      <div class="connect-grid" id="connect-grid"></div>
+      <noscript><p class="noscript-note">Our links are loaded with JavaScript. Please enable it to see our Discord, Instagram, and other links.</p></noscript>
+    </div>
+  </section>
+</main>
+
+<!-- ===================== FOOTER ===================== -->
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <p>&copy; <span id="year"></span> <span data-site="clubName">Hacksu</span>. Built by students, for students.</p>
+    <div class="footer-links">
+      <a id="footer-email" href="#" hidden></a>
+      <a href="#top">Back to top</a>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ==========================================================================
+   ##########################  EDIT HERE  ##########################
+   Everything below this banner (until "END OF CONFIG") is the only part you
+   need to change for routine updates. Look for CUSTOMIZE tags.
+   ========================================================================== */
+const SITE = {
+  clubName: "Hacksu",                                   // CUSTOMIZE
+  pronunciation: "/HAK ˈES ˈYŪ/",                      // CUSTOMIZE: landing screen
+  partOfSpeech: "noun",                                 // CUSTOMIZE
+  landingTagline: "the student builder club. where ideas become real projects.", // CUSTOMIZE
+  tagline: "Build things. Ship fast. Win hackathons.",  // CUSTOMIZE
+  shortDescription: "Hacksu is a student club that helps you enter hackathons and build the AI, programming, marketing, and teamwork skills to win them. Beginners welcome.", // CUSTOMIZE
+  timezone: "America/New_York",                         // CUSTOMIZE: IANA zone for display and calendar export
+  instagramUrl: "https://www.instagram.com/_hacksu?stkn=MWtvNmprMGU0d3o4ZA%3D%3D&utm_source=qr",           // CUSTOMIZE: full profile URL; empty hides the button
+  discordUrl: "https://discord.gg/BFRrXmbS5S",                    // CUSTOMIZE: invite URL; empty hides the button
+  customLinks: [                                        // CUSTOMIZE: add as many as you like. icon: "link" | "external" | "mail" | "doc" | "suitable"
+    { label: "Suitable Page", url: "https://app.suitable.co/student-organizations/yEZS8w8H6rpR?tab=profile", icon: "suitable" },
+    { label: "[LINK LABEL] Club resources", url: "https://example.com/resources", icon: "link" }
+  ],
+  contactEmail: "hacksuhq@gmail.com"                     // CUSTOMIZE: optional; empty hides it
+};
+
+/* CUSTOMIZE: add, edit, or delete events. Order does not matter (sorted automatically).
+   start = local wall time in SITE.timezone ("YYYY-MM-DDTHH:mm").
+   Set dateTBD: true to show "Date & time to be announced" (no calendar buttons).
+   Online meeting: set onlineUrl (shows a Join button instead of a map).
+   Exact map: set mapEmbedUrl (full Google Maps embed URL); otherwise mapQuery/address is used. */
+const EVENTS = [
+  {
+    id: "meeting-2026-10-15",
+    name: "[EVENT] Kickoff Meeting",
+    details: "[DETAILS] What we will cover and what to bring.",
+    start: "2026-10-15T18:00",
+    durationMinutes: 90,
+    dateTBD: false,
+    locationName: "[LOCATION] Student Center, Room 000",
+    address: "[ADDRESS] Kent State University, Kent, OH",
+    mapQuery: "Kent State University, Kent, OH",
+    mapEmbedUrl: "",
+    onlineUrl: ""
+  },
+  {
+    id: "meeting-2026-10-29",
+    name: "[EVENT] Workshop Night",
+    details: "[DETAILS] Hands-on workshop. Bring a laptop.",
+    start: "2026-10-29T18:00",
+    durationMinutes: 90,
+    dateTBD: false,
+    locationName: "[LOCATION] Library, Room 000",
+    address: "[ADDRESS] Kent State University Library, Kent, OH",
+    mapQuery: "Kent State University Library, Kent, OH",
+    mapEmbedUrl: "",
+    onlineUrl: ""
+  },
+  {
+    id: "meeting-2026-11-12",
+    name: "[EVENT] Virtual Team-Up",
+    details: "[DETAILS] Online meeting to form hackathon teams.",
+    start: "2026-11-12T18:00",
+    durationMinutes: 60,
+    dateTBD: false,
+    locationName: "[LOCATION] Online",
+    address: "",
+    mapQuery: "",
+    mapEmbedUrl: "",
+    onlineUrl: "https://example.com/join"
+  },
+  {
+    id: "meeting-tba",
+    name: "[EVENT] Hackathon Demo Day",
+    details: "[DETAILS] Date and room still being decided.",
+    dateTBD: true,
+    durationMinutes: 120,
+    locationName: "[LOCATION] To be announced",
+    address: "",
+    mapQuery: "",
+    mapEmbedUrl: "",
+    onlineUrl: ""
+  }
+];
+/* ##########################  END OF CONFIG  ########################## */
+
+
+/* ==========================================================================
+   Nothing below needs editing for routine updates.
+   ========================================================================== */
+(function () {
+  "use strict";
+  document.documentElement.classList.add("js");
+
+  /* ---------- helpers ---------- */
+  var $ = function (sel, root) { return (root || document).querySelector(sel); };
+  var $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
+
+  function h(tag, props) {
+    var el = document.createElement(tag);
+    props = props || {};
+    Object.keys(props).forEach(function (k) {
+      var v = props[k];
+      if (v === undefined || v === null || v === false) return;
+      if (k === "class") el.className = v;
+      else if (k === "text") el.textContent = v;
+      else el.setAttribute(k, v === true ? "" : String(v));
+    });
+    for (var i = 2; i < arguments.length; i++) {
+      var kid = arguments[i];
+      if (kid === null || kid === undefined || kid === false) continue;
+      el.appendChild(typeof kid === "string" ? document.createTextNode(kid) : kid);
+    }
+    return el;
+  }
+
+  function safeUrl(u) {
+    u = typeof u === "string" ? u.trim() : "";
+    return /^(https?:\/\/|mailto:)/i.test(u) ? u : "";
+  }
+  function safeHttps(u) {
+    u = typeof u === "string" ? u.trim() : "";
+    return /^https:\/\//i.test(u) ? u : "";
+  }
+  function str(v) { return typeof v === "string" ? v.trim() : ""; }
+
+  /* ---------- icons (trusted constant markup only; never config text) ---------- */
+  var S = 'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"';
+  var ICONS = {
+    instagram: '<svg ' + S + '><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>',
+    discord: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189z"/></svg>',
+    calendar: '<svg ' + S + '><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>',
+    pin: '<svg ' + S + '><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0116 0z"/><circle cx="12" cy="10" r="3"/></svg>',
+    clock: '<svg ' + S + '><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>',
+    external: '<svg ' + S + '><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>',
+    menu: '<svg ' + S + '><path d="M4 7h16M4 12h16M4 17h16"/></svg>',
+    close: '<svg ' + S + '><path d="M6 6l12 12M18 6L6 18"/></svg>',
+    download: '<svg ' + S + '><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>',
+    suitable: '<svg ' + S + '><defs><clipPath id="sc"><path d="M5 3h14v10c0 4-3.5 6.5-7 8-3.5-1.5-7-4-7-8z"/></clipPath></defs><path d="M5 3h14v10c0 4-3.5 6.5-7 8-3.5-1.5-7-4-7-8z"/><g clip-path="url(#sc)"><path d="M3 11L11 3M3 17L17 3M7 21L21 7M13 22l8-8"/></g></svg>',
+    link: '<svg ' + S + '><path d="M10 13a5 5 0 007.5.5l3-3a5 5 0 00-7-7l-1.7 1.7M14 11a5 5 0 00-7.5-.5l-3 3a5 5 0 007 7l1.7-1.7"/></svg>',
+    mail: '<svg ' + S + '><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>',
+    doc: '<svg ' + S + '><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>',
+    share: '<svg ' + S + '><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>',
+    chevron: '<svg ' + S + '><path d="M6 9l6 6 6-6"/></svg>',
+    video: '<svg ' + S + '><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M22 8l-6 4 6 4z"/></svg>'
+  };
+  function icon(name) {
+    var span = document.createElement("span");
+    span.style.display = "inline-flex";
+    span.innerHTML = ICONS[name] || ICONS.link;
+    return span.firstChild;
+  }
+  function fillIcons(root) {
+    $$("[data-icon]", root).forEach(function (el) {
+      if (el.firstChild) return;
+      el.innerHTML = ICONS[el.getAttribute("data-icon")] || "";
+    });
+  }
+
+  /* ---------- time zone math (Intl only) ---------- */
+  var TZ = (function () {
+    try { new Intl.DateTimeFormat("en-US", { timeZone: SITE.timezone }); return SITE.timezone; }
+    catch (e) { console.warn("Invalid SITE.timezone, using America/New_York", e); return "America/New_York"; }
+  })();
+
+  var partsFmt = new Intl.DateTimeFormat("en-US", {
+    timeZone: TZ, hourCycle: "h23", year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", second: "2-digit"
+  });
+  function partsOf(ts) {
+    var o = {};
+    partsFmt.formatToParts(new Date(ts)).forEach(function (p) { if (p.type !== "literal") o[p.type] = parseInt(p.value, 10); });
+    return { y: o.year, mo: o.month, d: o.day, h: o.hour % 24, mi: o.minute, s: o.second };
+  }
+  function tzOffset(ts) {
+    var p = partsOf(ts);
+    return Date.UTC(p.y, p.mo - 1, p.d, p.h, p.mi, p.s) - Math.floor(ts / 1000) * 1000;
+  }
+  /* wall time in TZ -> UTC ms. Re-checks the offset so DST changes are handled. */
+  function wallToUtc(y, mo, d, h, mi) {
+    var guess = Date.UTC(y, mo - 1, d, h, mi, 0);
+    var o1 = tzOffset(guess);
+    var t = guess - o1;
+    var o2 = tzOffset(t);
+    if (o2 !== o1) t = guess - o2;
+    return t;
+  }
+  function parseWall(s) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::\d{2})?$/.exec(str(s));
+    if (!m) return NaN;
+    var y = +m[1], mo = +m[2], d = +m[3], hh = +m[4], mi = +m[5];
+    var chk = new Date(Date.UTC(y, mo - 1, d, hh, mi));
+    if (mo < 1 || mo > 12 || hh > 23 || mi > 59 || chk.getUTCMonth() !== mo - 1 || chk.getUTCDate() !== d) return NaN;
+    return wallToUtc(y, mo, d, hh, mi);
+  }
+  function pad(n, w) { n = String(n); while (n.length < (w || 2)) n = "0" + n; return n; }
+  function compactLocal(ts) {   /* YYYYMMDDTHHmmss in TZ (for Google Calendar) */
+    var p = partsOf(ts);
+    return pad(p.y, 4) + pad(p.mo) + pad(p.d) + "T" + pad(p.h) + pad(p.mi) + pad(p.s);
+  }
+  function compactUtc(ts) {
+    return new Date(ts).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+  }
+  var whenFmt = new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short" });
+  var whenYearFmt = new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday: "short", month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short" });
+  function formatWhen(ts) {
+    var sameYear = partsOf(ts).y === partsOf(Date.now()).y;
+    return (sameYear ? whenFmt : whenYearFmt).format(new Date(ts));
+  }
+  function tzLongName() {
+    try {
+      var parts = new Intl.DateTimeFormat("en-US", { timeZone: TZ, timeZoneName: "long" }).formatToParts(new Date());
+      for (var i = 0; i < parts.length; i++) if (parts[i].type === "timeZoneName") return parts[i].value.replace(/ (Standard|Daylight) Time$/, " Time");
+    } catch (e) { /* ignore */ }
+    return TZ;
+  }
+
+  /* ---------- event normalisation ---------- */
+  function normalise(list) {
+    var out = [];
+    var seen = {};
+    (Array.isArray(list) ? list : []).forEach(function (raw, i) {
+      if (!raw || typeof raw !== "object") { console.warn("Skipping event " + i + ": not an object"); return; }
+      var tbd = raw.dateTBD === true;
+      var dur = Number(raw.durationMinutes);
+      if (!isFinite(dur) || dur <= 0) dur = 60;
+      var startMs = NaN;
+      if (!tbd) {
+        startMs = parseWall(raw.start);
+        if (isNaN(startMs)) { console.warn("Skipping event \"" + (raw.id || raw.name || i) + "\": invalid start \"" + raw.start + "\" (expected YYYY-MM-DDTHH:mm)"); return; }
+      }
+      var id = str(raw.id) || ("event-" + i);
+      if (seen[id]) id = id + "-" + i;
+      seen[id] = true;
+      out.push({
+        id: id,
+        name: str(raw.name) || "Untitled meeting",
+        details: str(raw.details),
+        tbd: tbd,
+        startMs: startMs,
+        endMs: tbd ? NaN : startMs + dur * 60000,
+        durationMinutes: dur,
+        locationName: str(raw.locationName),
+        address: str(raw.address),
+        mapQuery: str(raw.mapQuery),
+        mapEmbedUrl: safeHttps(raw.mapEmbedUrl),
+        onlineUrl: safeUrl(raw.onlineUrl)
+      });
+    });
+    return out;
+  }
+  var ALL = normalise(EVENTS);
+
+  function upcoming(now) {
+    var dated = ALL.filter(function (e) { return !e.tbd && e.endMs > now; }).sort(function (a, b) { return a.startMs - b.startMs; });
+    var tbd = ALL.filter(function (e) { return e.tbd; });
+    return { dated: dated, tbd: tbd };
+  }
+
+  function mapQueryOf(e) { return e.mapQuery || e.address || e.locationName; }
+  function hasMap(e) { return !e.onlineUrl && !!(e.mapEmbedUrl || mapQueryOf(e)); }
+  function mapEmbedSrc(e) { return e.mapEmbedUrl || ("https://www.google.com/maps?q=" + encodeURIComponent(mapQueryOf(e)) + "&output=embed"); }
+  function mapOpenUrl(e) { return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(mapQueryOf(e)); }
+  function locationLine(e) {
+    var parts = [];
+    if (e.locationName) parts.push(e.locationName);
+    if (e.address && e.address !== e.locationName) parts.push(e.address);
+    if (!parts.length && e.onlineUrl) parts.push("Online");
+    return parts.join(", ");
+  }
+  function descriptionOf(e) {
+    var d = e.details;
+    if (e.onlineUrl) d += (d ? "\n\n" : "") + "Join online: " + e.onlineUrl;
+    return d;
+  }
+
+  /* ---------- calendar links ---------- */
+  function googleUrl(e) {
+    var q = [
+      "action=TEMPLATE",
+      "text=" + encodeURIComponent(e.name),
+      "dates=" + compactLocal(e.startMs) + "/" + compactLocal(e.endMs),
+      "ctz=" + encodeURIComponent(TZ),
+      "details=" + encodeURIComponent(descriptionOf(e)),
+      "location=" + encodeURIComponent(locationLine(e))
+    ];
+    return "https://calendar.google.com/calendar/render?" + q.join("&");
+  }
+  function outlookUrl(e) {
+    var iso = function (ts) { return new Date(ts).toISOString().replace(/\.\d{3}Z$/, "Z"); };
+    var q = [
+      "path=" + encodeURIComponent("/calendar/action/compose"),
+      "rru=addevent",
+      "subject=" + encodeURIComponent(e.name),
+      "startdt=" + encodeURIComponent(iso(e.startMs)),
+      "enddt=" + encodeURIComponent(iso(e.endMs)),
+      "body=" + encodeURIComponent(descriptionOf(e)),
+      "location=" + encodeURIComponent(locationLine(e))
+    ];
+    return "https://outlook.live.com/calendar/0/deeplink/compose?" + q.join("&");
+  }
+
+  /* ---------- ICS (RFC 5545) ---------- */
+  function icsEscape(s) {
+    return String(s).replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r\n|\r|\n/g, "\\n");
+  }
+  function foldLine(line) {   /* fold at 75 octets, never splitting a UTF-8 character */
+    var enc = new TextEncoder();
+    if (enc.encode(line).length <= 75) return line;
+    var out = [], cur = "", bytes = 0, limit = 75;
+    for (var ch of line) {
+      var n = enc.encode(ch).length;
+      if (bytes + n > limit) { out.push(cur); cur = ""; bytes = 0; limit = 74; }   /* continuation lines start with 1 space */
+      cur += ch; bytes += n;
+    }
+    out.push(cur);
+    return out.join("\r\n ");
+  }
+  function slug(s) { return String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "club"; }
+  function buildIcs(events) {
+    var stamp = compactUtc(Date.now());
+    var domain = slug(SITE.clubName) + ".calendar";
+    var lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//" + icsEscape(SITE.clubName) + "//Meetings//EN", "CALSCALE:GREGORIAN", "METHOD:PUBLISH", "X-WR-CALNAME:" + icsEscape(SITE.clubName + " meetings")];
+    events.forEach(function (e) {
+      lines.push("BEGIN:VEVENT");
+      lines.push("UID:" + e.id.replace(/[^A-Za-z0-9._-]/g, "-") + "-" + compactUtc(e.startMs) + "@" + domain);
+      lines.push("DTSTAMP:" + stamp);
+      lines.push("DTSTART:" + compactUtc(e.startMs));
+      lines.push("DTEND:" + compactUtc(e.endMs));
+      lines.push("SUMMARY:" + icsEscape(e.name));
+      var d = descriptionOf(e);
+      if (d) lines.push("DESCRIPTION:" + icsEscape(d));
+      var loc = locationLine(e);
+      if (loc) lines.push("LOCATION:" + icsEscape(loc));
+      if (e.onlineUrl) lines.push("URL:" + e.onlineUrl);
+      lines.push("END:VEVENT");
+    });
+    lines.push("END:VCALENDAR");
+    return lines.map(foldLine).join("\r\n") + "\r\n";
+  }
+  function downloadIcs(events, filename) {
+    var blob = new Blob([buildIcs(events)], { type: "text/calendar;charset=utf-8" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = filename;
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+    toast("Calendar file downloaded");
+  }
+
+  /* ---------- toast ---------- */
+  var toastEl = $("#toast"), toastTimer = 0;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove("show"); }, 2800);
+  }
+
+  /* ---------- copy / share ---------- */
+  function copyText(text) {
+    function legacy() {
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.cssText = "position:fixed;top:0;left:0;opacity:0;";
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = false;
+      try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+      ta.remove();
+      return ok;
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(text).then(function () { return true; }, function () { return legacy(); });
+    }
+    return Promise.resolve(legacy());
+  }
+  function shareEvent(e) {
+    var text = e.name + "\n" + formatWhen(e.startMs) + (locationLine(e) ? "\n" + locationLine(e) : "") + (e.details ? "\n\n" + e.details : "");
+    var url = location.href.split("#")[0];
+    if (navigator.share) {
+      navigator.share({ title: e.name, text: text, url: url }).catch(function (err) {
+        if (err && err.name === "AbortError") return;
+        copyText(text + "\n" + url).then(function (ok) { toast(ok ? "Details copied" : "Could not copy"); });
+      });
+      return;
+    }
+    copyText(text + "\n" + url).then(function (ok) { toast(ok ? "Link copied" : "Could not copy"); });
+  }
+
+  /* ---------- builders ---------- */
+  function extLink(cls, iconName, label, href) {
+    return h("a", { class: cls, href: href, target: "_blank", rel: "noopener noreferrer" }, icon(iconName), label);
+  }
+
+  function calendarActions(e, small) {
+    var cls = "btn" + (small ? " btn-sm" : "");
+    var ics = h("button", { class: cls, type: "button" }, icon("download"), "Download .ics");
+    ics.addEventListener("click", function () { downloadIcs([e], slug(e.id) + ".ics"); });
+    var wrap = h("div", null,
+      h("span", { class: "action-label" }, "Add to calendar"),
+      h("div", { class: "actions" },
+        extLink(cls, "calendar", "Google Calendar", googleUrl(e)),
+        extLink(cls, "calendar", "Outlook", outlookUrl(e)),
+        ics));
+    return wrap;
+  }
+
+  function mapBlock(e, lazy) {
+    var frame = h("div", { class: "map-frame" },
+      h("div", { class: "map-fallback" }, "Map loading. If it stays blank, use the Open in Maps link."));
+    function load() {
+      if (frame.querySelector("iframe")) return;
+      frame.appendChild(h("iframe", {
+        title: "Map showing " + (e.locationName || e.address || "meeting location"),
+        src: mapEmbedSrc(e),
+        loading: "lazy",
+        referrerpolicy: "no-referrer-when-downgrade",
+        allowfullscreen: true,
+        width: "100%",
+        height: "100%"
+      }));
+    }
+    var block = h("div", { class: "map-wrap" }, frame,
+      h("div", { class: "map-links" }, extLink("btn btn-sm", "external", "Open in Maps", mapOpenUrl(e))));
+    if (!lazy) load();
+    return { el: block, load: load };
+  }
+
+  function buildEvent(e, featured) {
+    var meta = h("div", { class: "meta" });
+    if (e.tbd) {
+      meta.appendChild(h("div", { class: "meta-row" }, icon("clock"), h("span", { class: "when" }, "Date & time to be announced")));
+    } else {
+      meta.appendChild(h("div", { class: "meta-row" }, icon("clock"), h("span", { class: "when" }, formatWhen(e.startMs))));
+    }
+    var loc = null;
+    if (e.locationName || e.address) {
+      loc = h("div", { class: "meta-row" }, icon(e.onlineUrl ? "video" : "pin"),
+        h("span", { class: "where" }, e.locationName || e.address,
+          (e.locationName && e.address && e.address !== e.locationName) ? h("small", { text: e.address }) : null));
+    } else if (e.onlineUrl) {
+      loc = h("div", { class: "meta-row" }, icon("video"), h("span", { class: "where" }, "Online"));
+    }
+    if (loc) meta.appendChild(loc);
+
+    var card = h("article", { class: "card event reveal" + (featured ? " featured" : ""), "aria-labelledby": "t-" + e.id });
+    var title = h(featured ? "h4" : "h4", { id: "t-" + e.id, text: e.name });
+    if (featured) title.className = "featured-title";
+
+    var left = h("div", { class: "featured-body-left", style: "display:grid;gap:16px;align-content:start;min-width:0" },
+      title, meta, e.details ? h("p", { class: "details", text: e.details }) : null);
+
+    var actions = h("div", { style: "display:grid;gap:16px" });
+    if (e.onlineUrl) {
+      actions.appendChild(h("div", { class: "actions" }, extLink("btn btn-primary" + (featured ? " btn-lg" : ""), "video", "Join online", e.onlineUrl)));
+    }
+    if (!e.tbd) actions.appendChild(calendarActions(e, !featured));
+    else actions.appendChild(h("span", { class: "tba-note" }, "Calendar buttons appear once the date is set."));
+    if (featured) {
+      var share = h("button", { class: "btn", type: "button" }, icon("share"), "Share / copy details");
+      share.addEventListener("click", function () { shareEvent(e); });
+      actions.appendChild(h("div", { class: "actions" }, share));
+    }
+    left.appendChild(actions);
+
+    var mapOn = hasMap(e);
+    if (featured) {
+      var body = h("div", { class: "featured-body" + (mapOn ? " has-map" : "") }, left);
+      if (mapOn) body.appendChild(mapBlock(e, false).el);
+      card.appendChild(body);
+      card.querySelector(".featured-title").style.fontSize = "clamp(1.6rem, 4.5vw, 2.4rem)";
+    } else {
+      card.appendChild(left);
+      if (mapOn) {
+        var mb = mapBlock(e, true);
+        var sum = h("summary", null, icon("pin"), "Show map", (function () { var c = icon("chevron"); c.setAttribute("class", "chev"); return c; })());
+        var det = h("details", { class: "map-details" }, sum, mb.el);
+        det.addEventListener("toggle", function () { if (det.open) mb.load(); });
+        card.appendChild(det);
+      }
+    }
+    return card;
+  }
+
+  /* ---------- hero chip + render ---------- */
+  var chipWrap = $("#next-chip-wrap");
+  var meetingsRoot = $("#meetings-root");
+  var lastSig = null;
+  var countdownEl = null;
+
+  function countdownText(e, now) {
+    if (now >= e.startMs) return "happening now";
+    var mins = Math.floor((e.startMs - now) / 60000);
+    var d = Math.floor(mins / 1440), hr = Math.floor((mins % 1440) / 60), m = mins % 60;
+    if (mins < 1) return "starting in under a minute";
+    return "in " + (d ? d + "d " : "") + hr + "h " + m + "m";
+  }
+
+  function renderChip(next, now, hasTbd) {
+    chipWrap.textContent = "";
+    countdownEl = null;
+    if (!next) {
+      chipWrap.appendChild(h("a", { class: "chip", href: "#meetings" }, h("span", { class: "dot" }), hasTbd ? "Next meeting: TBA" : "Next meeting: TBA"));
+      return;
+    }
+    countdownEl = h("strong", { text: countdownText(next, now) });
+    chipWrap.appendChild(h("a", { class: "chip", href: "#meetings" },
+      h("span", { class: "dot" }), "Next meeting:", h("span", { text: next.name }), "\u00b7", countdownEl));
+  }
+
+  function observe(root) {
+    var els = $$(".reveal:not(.in)", root);
+    if (!("IntersectionObserver" in window)) { els.forEach(function (el) { el.classList.add("in"); }); return; }
+    els.forEach(function (el) { revealIO.observe(el); });
+  }
+  var revealIO = ("IntersectionObserver" in window) ? new IntersectionObserver(function (entries, o) {
+    entries.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add("in"); o.unobserve(en.target); } });
+  }, { threshold: 0.08, rootMargin: "0px 0px -6% 0px" }) : null;
+
+  function socialButtons() {
+    var wrap = h("div", { class: "hero-cta" });
+    var d = safeUrl(SITE.discordUrl), i = safeUrl(SITE.instagramUrl);
+    if (d) wrap.appendChild(extLink("btn btn-primary btn-lg", "discord", "Join Discord", d));
+    if (i) wrap.appendChild(extLink("btn btn-lg", "instagram", "Follow on Instagram", i));
+    return wrap;
+  }
+
+  function renderMeetings(now) {
+    var u = upcoming(now);
+    var next = u.dated[0] || null;
+    var sig = u.dated.map(function (e) { return e.id; }).join("|") + "#" + u.tbd.map(function (e) { return e.id; }).join("|");
+    renderChip(next, now, u.tbd.length > 0);
+    if (sig === lastSig) return;
+    lastSig = sig;
+
+    meetingsRoot.textContent = "";
+
+    if (!u.dated.length && !u.tbd.length) {
+      var empty = h("div", { class: "card empty reveal" },
+        h("h3", { text: "No meetings on the calendar yet" }),
+        h("p", { text: "We are planning the next one. Join our Discord or follow us on Instagram and you will be the first to know." }),
+        socialButtons());
+      meetingsRoot.appendChild(empty);
+      observe(meetingsRoot);
+      return;
+    }
+
+    if (next) {
+      var datedForAll = u.dated;
+      meetingsRoot.appendChild(h("div", { class: "sub-head" }, h("h3", null, h("span", { class: "eyebrow" }, "Up next"), "Next meeting")));
+      meetingsRoot.appendChild(buildEvent(next, true));
+
+      var rest = u.dated.slice(1);
+      var head = h("div", { class: "sub-head" }, h("h3", null, h("span", { class: "eyebrow" }, "Coming soon"), "Future meetings"));
+      var all = h("button", { class: "btn btn-sm", type: "button" }, icon("download"), "Add all upcoming meetings (.ics)");
+      all.addEventListener("click", function () { downloadIcs(upcoming(Date.now()).dated.length ? upcoming(Date.now()).dated : datedForAll, slug(SITE.clubName) + "-meetings.ics"); });
+      head.appendChild(all);
+      meetingsRoot.appendChild(head);
+      if (rest.length) {
+        var grid = h("div", { class: "future-grid" });
+        rest.forEach(function (e) { grid.appendChild(buildEvent(e, false)); });
+        meetingsRoot.appendChild(grid);
+      } else {
+        meetingsRoot.appendChild(h("p", { class: "notice", text: "No other dated meetings yet. Check back soon." }));
+      }
+    } else {
+      meetingsRoot.appendChild(h("p", { class: "notice", text: "No meeting dates are set yet. Details are below, and we will announce dates on Discord and Instagram." }));
+    }
+
+    if (u.tbd.length) {
+      meetingsRoot.appendChild(h("div", { class: "sub-head" }, h("h3", null, h("span", { class: "eyebrow" }, "Stay tuned"), "To be announced")));
+      var g2 = h("div", { class: "future-grid" });
+      u.tbd.forEach(function (e) { g2.appendChild(buildEvent(e, false)); });
+      meetingsRoot.appendChild(g2);
+    }
+    observe(meetingsRoot);
+  }
+
+  function tick() {
+    var now = Date.now();
+    var u = upcoming(now);
+    var sig = u.dated.map(function (e) { return e.id; }).join("|") + "#" + u.tbd.map(function (e) { return e.id; }).join("|");
+    if (sig !== lastSig) { renderMeetings(now); return; }
+    if (countdownEl && u.dated[0]) countdownEl.textContent = countdownText(u.dated[0], now);
+  }
+
+  /* ---------- static content from SITE ---------- */
+  function applySite() {
+    document.title = SITE.clubName + " | Student Hackathon Club";
+    $$("[data-site]").forEach(function (el) {
+      var v = SITE[el.getAttribute("data-site")];
+      if (typeof v === "string" && v.trim()) el.textContent = v.trim();
+    });
+    $$("[data-link]").forEach(function (el) {
+      var u = safeUrl(SITE[el.getAttribute("data-link")]);
+      if (u) el.setAttribute("href", u);
+    });
+    $$("[data-needs]").forEach(function (el) {
+      if (!safeUrl(SITE[el.getAttribute("data-needs")])) el.hidden = true;
+    });
+    $("#tz-label").textContent = tzLongName();
+    $("#year").textContent = String(new Date().getFullYear());
+    var email = str(SITE.contactEmail);
+    if (email && /^[^\s@]+@[^\s@]+$/.test(email)) {
+      var a = $("#footer-email");
+      a.href = "mailto:" + email;
+      a.textContent = email;
+      a.hidden = false;
+    }
+    fillIcons(document);
+  }
+
+  function renderConnect() {
+    var grid = $("#connect-grid");
+    var items = [];
+    var i = safeUrl(SITE.instagramUrl), d = safeUrl(SITE.discordUrl);
+    if (d) items.push({ label: "Discord", url: d, icon: "discord" });
+    if (i) items.push({ label: "Instagram", url: i, icon: "instagram" });
+    (Array.isArray(SITE.customLinks) ? SITE.customLinks : []).forEach(function (l) {
+      var u = l && safeUrl(l.url);
+      if (!u) return;
+      items.push({ label: str(l.label) || u, url: u, icon: ICONS[l.icon] ? l.icon : "link" });
+    });
+    if (!items.length) { grid.appendChild(h("p", { class: "notice", text: "Links coming soon." })); return; }
+    items.forEach(function (it) {
+      var isMail = /^mailto:/i.test(it.url);
+      var a = h("a", { class: "connect-btn reveal", href: it.url },
+        h("span", { class: "ico" }, icon(it.icon)),
+        h("span", { class: "label", text: it.label }));
+      if (!isMail) { a.target = "_blank"; a.rel = "noopener noreferrer"; var x = icon("external"); x.setAttribute("class", "ext"); a.appendChild(x); }
+      grid.appendChild(a);
+    });
+  }
+
+  /* ---------- mobile menu ---------- */
+  function initMenu() {
+    var btn = $("#nav-toggle"), nav = $("#site-nav");
+    function setOpen(open, refocus) {
+      nav.classList.toggle("open", open);
+      btn.setAttribute("aria-expanded", open ? "true" : "false");
+      btn.setAttribute("aria-label", open ? "Close menu" : "Menu");
+      if (!open && refocus) btn.focus();
+    }
+    btn.addEventListener("click", function () { setOpen(btn.getAttribute("aria-expanded") !== "true"); });
+    document.addEventListener("keydown", function (ev) {
+      if (ev.key === "Escape" && btn.getAttribute("aria-expanded") === "true") setOpen(false, true);
+    });
+    nav.addEventListener("click", function (ev) { if (ev.target.closest("a")) setOpen(false); });
+    document.addEventListener("click", function (ev) {
+      if (btn.getAttribute("aria-expanded") === "true" && !nav.contains(ev.target) && !btn.contains(ev.target)) setOpen(false);
+    });
+    window.addEventListener("resize", function () { if (window.innerWidth >= 768) setOpen(false); });
+  }
+
+  /* ---------- Matrix rain (decorative canvas of falling 1s and 0s) ---------- */
+  function initRain() {
+    var cv = $("#rain");
+    var ctx = cv.getContext && cv.getContext("2d");
+    if (!ctx) return;
+    var reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+    var size = 16, cols = 0, drops = [], w = 0, hgt = 0, last = 0, raf = 0;
+    var color = (getComputedStyle(document.documentElement).getPropertyValue("--rain") || "#00ff41").trim();
+    function resize() {
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      w = window.innerWidth; hgt = window.innerHeight;
+      cv.width = w * dpr; cv.height = hgt * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.fillStyle = "#000"; ctx.fillRect(0, 0, w, hgt);
+      ctx.font = size + "px 'Share Tech Mono', ui-monospace, Menlo, Consolas, monospace";
+      cols = Math.ceil(w / size);
+      drops = [];
+      for (var i = 0; i < cols; i++) drops.push(Math.floor(Math.random() * -hgt / size));
+    }
+    function frame(ts) {
+      raf = requestAnimationFrame(frame);
+      if (ts - last < 55) return;
+      last = ts;
+      ctx.fillStyle = "rgba(0, 0, 0, 0.09)";
+      ctx.fillRect(0, 0, w, hgt);
+      for (var i = 0; i < cols; i++) {
+        var y = drops[i] * size;
+        if (y > 0) {
+          ctx.fillStyle = color;
+          ctx.fillText(Math.random() < 0.5 ? "0" : "1", i * size, y - size);
+          ctx.fillStyle = "#e6ffec";
+          ctx.fillText(Math.random() < 0.5 ? "0" : "1", i * size, y);
+        }
+        if (y > hgt && Math.random() > 0.975) drops[i] = 0;
+        drops[i]++;
+      }
+    }
+    function staticFrame() {
+      resize();
+      ctx.fillStyle = color; ctx.globalAlpha = 0.35;
+      for (var i = 0; i < cols; i++) for (var j = 0; j < hgt / size; j++) if (Math.random() < 0.18) ctx.fillText(Math.random() < 0.5 ? "0" : "1", i * size, j * size);
+      ctx.globalAlpha = 1;
+    }
+    function start() {
+      cancelAnimationFrame(raf);
+      if (reduce.matches) { staticFrame(); return; }
+      resize();
+      raf = requestAnimationFrame(frame);
+    }
+    var rt = 0;
+    window.addEventListener("resize", function () { clearTimeout(rt); rt = setTimeout(start, 200); });
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden) cancelAnimationFrame(raf); else if (!reduce.matches) { cancelAnimationFrame(raf); raf = requestAnimationFrame(frame); }
+    });
+    if (reduce.addEventListener) reduce.addEventListener("change", start);
+    start();
+  }
+
+  /* ---------- boot ---------- */
+  applySite();
+  renderConnect();
+  renderMeetings(Date.now());
+  initMenu();
+  initRain();
+  observe(document);
+  setInterval(tick, 30000);
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) tick(); });
+})();
+</script>
+</body>
+</html>
